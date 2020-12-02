@@ -5,9 +5,11 @@ import de.consol.dus.boundary.request.CreateUserRequest;
 import de.consol.dus.boundary.response.ErrorResponse;
 import de.consol.dus.boundary.response.UserResponse;
 import io.quarkus.security.Authenticated;
+import io.quarkus.security.identity.SecurityIdentity;
 import java.net.URI;
 import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
@@ -17,7 +19,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.eclipse.microprofile.metrics.annotation.Counted;
 import org.eclipse.microprofile.metrics.annotation.Metered;
 import org.eclipse.microprofile.metrics.annotation.Timed;
@@ -31,12 +33,20 @@ import org.eclipse.microprofile.openapi.annotations.responses.APIResponses;
 @Path(UserResource.PATH)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class UserResource {
 
   public static final String PATH = "/users";
 
   private final UserService userService;
+
+  private SecurityIdentity identity;
+
+  @Inject
+  UserResource setIdentity(SecurityIdentity identity) {
+    this.identity = identity;
+    return this;
+  }
 
   @Operation(summary = "Create a new user.")
   @APIResponses(value = {
